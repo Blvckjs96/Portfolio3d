@@ -44,7 +44,7 @@ export const FlipWords = ({ words, duration = 3000, className }) => {
           y: -40,
           x: 40,
           filter: "blur(8px)",
-          scale: 2,
+          scale: 1.3,
           position: "absolute",
         }}
         className={twMerge("z-10 inline-block relative text-left", className)}

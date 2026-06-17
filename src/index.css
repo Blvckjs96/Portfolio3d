@@ -10,8 +10,9 @@
   --color-storm: #282b4b;
   --color-aqua: #33c2cc;
   --color-mint: #57db96;
-  --color-royal: #5c33cc;
-  --color-lavender: #7a57db;
+  --color-teal: #0c8a99;
+  --color-royal: #0c8a99;
+  --color-lavender: #33c2cc;
   --color-fuchsia: #ca2f8c;
   --color-orange: #cc6033;
   --color-sand: #d6995c;
@@ -120,7 +121,7 @@ body {
 }
 
 .grid-special-color {
-  @apply p-6 bg-gradient-to-b from-royal to-lavender rounded-2xl;
+  @apply p-6 bg-gradient-to-br from-midnight via-teal to-aqua rounded-2xl;
 }
 .grid-black-color {
   @apply p-6 bg-gradient-to-tl from-[#3A3A3A] via-[#242424] to-[#3A3A3A] rounded-2xl;

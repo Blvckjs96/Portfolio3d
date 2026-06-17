@@ -225,19 +225,14 @@ export const myProjects = [
 
 export const mySocials = [
   {
-    name: "Facebook",
-    href: "https://www.facebook.com/kiet.nguyen.030896/",
-    icon: "/assets/socials/facebook.svg",
-  },
-  {
     name: "Linkedin",
     href: "https://www.linkedin.com/in/tuan-kiet-nguyen-65054527a/",
     icon: "/assets/socials/linkedIn.svg",
   },
   {
-    name: "Instagram",
-    href: "https://www.instagram.com/__im.jason__/",
-    icon: "/assets/socials/instagram.svg",
+    name: "GitHub",
+    href: "https://github.com/Blvckjs96",
+    icon: "/assets/socials/github.svg",
   },
 ];
 

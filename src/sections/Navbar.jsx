@@ -187,7 +187,7 @@ const Navbar = () => {
           <motion.div
             key="pill"
             className="fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none"
-            style={{ paddingTop: 12 }}
+            style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}
             initial={{ opacity: 0, y: -24, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -24, scale: 0.92 }}
@@ -240,11 +240,12 @@ const Navbar = () => {
               <AnimatePresence>
                 {isOpen && (
                   <motion.div
-                    className="sm:hidden absolute top-full mt-2 min-w-[170px] rounded-2xl border border-white/[0.08] overflow-hidden"
+                    className="sm:hidden absolute top-full mt-2 min-w-[170px] rounded-2xl border border-white/[0.18] overflow-hidden"
                     style={{
-                      backdropFilter: "blur(24px) saturate(200%)",
-                      WebkitBackdropFilter: "blur(24px) saturate(200%)",
-                      background: "rgba(3, 4, 18, 0.92)",
+                      backdropFilter: "blur(40px) saturate(250%) brightness(1.1)",
+                      WebkitBackdropFilter: "blur(40px) saturate(250%) brightness(1.1)",
+                      background: "linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(3,4,18,0.55) 100%)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.35), inset 0 1.5px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.12)",
                     }}
                     initial={{ opacity: 0, y: -8, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}

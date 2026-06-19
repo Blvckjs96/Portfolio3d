@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_LINKS = [
@@ -10,11 +10,20 @@ const NAV_LINKS = [
 
 const EASE = [0.16, 1, 0.3, 1];
 
-const glassPillStyle = {
-  backdropFilter: "blur(24px) saturate(200%)",
-  WebkitBackdropFilter: "blur(24px) saturate(200%)",
-  background: "rgba(3, 4, 18, 0.72)",
-  boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
+const PILL = {
+  large: { px: 24, py: 12, gap: 16 },
+  small: { px: 16, py: 8, gap: 10 },
+};
+
+const GLASS = {
+  large: {
+    bg: "linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(3,4,18,0.18) 100%)",
+    shadow: "0 8px 40px rgba(0,0,0,0.25), inset 0 1.5px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.12)",
+  },
+  small: {
+    bg: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(3,4,18,0.58) 100%)",
+    shadow: "0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.18)",
+  },
 };
 
 function NavLinks({ activeSection, compact, onLinkClick }) {
@@ -28,8 +37,8 @@ function NavLinks({ activeSection, compact, onLinkClick }) {
             href={href}
             onClick={onLinkClick}
             className={[
-              "rounded-full text-[13px] font-medium transition-all duration-200",
-              compact ? "px-2.5 py-1" : "px-3.5 py-1.5",
+              "rounded-full font-medium transition-all duration-300",
+              compact ? "text-[13px] px-2.5 py-1" : "text-[14px] px-3.5 py-1.5",
               isActive
                 ? "bg-white/10 text-white"
                 : "text-neutral-400 hover:text-white hover:bg-white/5",
@@ -43,10 +52,10 @@ function NavLinks({ activeSection, compact, onLinkClick }) {
   );
 }
 
-function MobileMenu({ links, activeSection, onClose }) {
+function MobileMenu({ activeSection, onClose }) {
   return (
     <nav className="flex flex-col p-1.5">
-      {links.map(({ label, href, section }) => {
+      {NAV_LINKS.map(({ label, href, section }) => {
         const isActive = activeSection === section;
         return (
           <a
@@ -71,16 +80,31 @@ function MobileMenu({ links, activeSection, onClose }) {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  const [scrolled, setScrolled] = useState(false);
+  // navState: 'top' | 'large' | 'small'
+  const [navState, setNavState] = useState("top");
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+
+      if (y <= 10) {
+        setNavState("top");
+      } else if (Math.abs(delta) > 4) {
+        setNavState(delta > 0 ? "small" : "large");
+      }
+
+      lastScrollY.current = y;
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile menu on scroll state change
-  useEffect(() => { setIsOpen(false); }, [scrolled]);
+  useEffect(() => {
+    if (navState === "top") setIsOpen(false);
+  }, [navState]);
 
   useEffect(() => {
     const observers = NAV_LINKS.map(({ section }) => {
@@ -96,11 +120,16 @@ const Navbar = () => {
     return () => observers.forEach((obs) => obs?.disconnect());
   }, []);
 
+  const isTop = navState === "top";
+  const pillKey = navState === "large" ? "large" : "small";
+  const cfg = PILL[pillKey];
+  const glass = GLASS[pillKey];
+
   return (
     <>
-      {/* ── Full-width bar — shown at top ── */}
+      {/* ── Full-width bar — at top ── */}
       <AnimatePresence>
-        {!scrolled && (
+        {isTop && (
           <motion.div
             key="fullbar"
             className="fixed inset-x-0 top-0 z-50"
@@ -130,14 +159,9 @@ const Navbar = () => {
                     alt="toggle"
                   />
                 </button>
-                <NavLinks
-                  activeSection={activeSection}
-                  onLinkClick={() => setIsOpen(false)}
-                />
+                <NavLinks activeSection={activeSection} onLinkClick={() => setIsOpen(false)} />
               </div>
             </div>
-
-            {/* Mobile dropdown for full bar */}
             <AnimatePresence>
               {isOpen && (
                 <motion.div
@@ -148,11 +172,7 @@ const Navbar = () => {
                   transition={{ duration: 0.25, ease: EASE }}
                 >
                   <div className="pb-3 c-space">
-                    <MobileMenu
-                      links={NAV_LINKS}
-                      activeSection={activeSection}
-                      onClose={() => setIsOpen(false)}
-                    />
+                    <MobileMenu activeSection={activeSection} onClose={() => setIsOpen(false)} />
                   </div>
                 </motion.div>
               )}
@@ -161,30 +181,46 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Floating pill — shown when scrolled ── */}
+      {/* ── Floating pill — large (scroll up) or small (scroll down) ── */}
       <AnimatePresence>
-        {scrolled && (
+        {!isTop && (
           <motion.div
             key="pill"
-            className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-3 pointer-events-none"
+            className="fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none"
+            style={{ paddingTop: 12 }}
             initial={{ opacity: 0, y: -24, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -24, scale: 0.92 }}
             transition={{ duration: 0.4, ease: EASE }}
           >
             <div className="pointer-events-auto relative flex flex-col items-center">
-              {/* Pill */}
-              <div
-                className="flex items-center gap-3 px-5 py-2 rounded-full border border-white/[0.08]"
-                style={glassPillStyle}
+              {/* Morphing pill */}
+              <motion.div
+                className="flex items-center rounded-full border border-white/[0.18]"
+                initial={false}
+                animate={{
+                  paddingLeft: cfg.px,
+                  paddingRight: cfg.px,
+                  paddingTop: cfg.py,
+                  paddingBottom: cfg.py,
+                  gap: cfg.gap,
+                }}
+                transition={{ duration: 0.45, ease: EASE }}
+                style={{
+                  backdropFilter: "blur(40px) saturate(250%) brightness(1.15)",
+                  WebkitBackdropFilter: "blur(40px) saturate(250%) brightness(1.15)",
+                  background: glass.bg,
+                  boxShadow: glass.shadow,
+                  transition: "background 0.45s cubic-bezier(0.16,1,0.3,1), box-shadow 0.45s cubic-bezier(0.16,1,0.3,1)",
+                }}
               >
-                <a href="/" className="text-[13px] font-bold text-white shrink-0">
+                <a href="/" className="font-bold text-[13px] text-white shrink-0">
                   Jason
                 </a>
                 <div className="hidden sm:block h-3.5 w-px bg-white/10 shrink-0" />
                 <NavLinks
                   activeSection={activeSection}
-                  compact
+                  compact={navState === "small"}
                   onLinkClick={() => setIsOpen(false)}
                 />
                 <button
@@ -198,24 +234,24 @@ const Navbar = () => {
                     alt="toggle"
                   />
                 </button>
-              </div>
+              </motion.div>
 
-              {/* Mobile dropdown for pill */}
+              {/* Mobile dropdown */}
               <AnimatePresence>
                 {isOpen && (
                   <motion.div
                     className="sm:hidden absolute top-full mt-2 min-w-[170px] rounded-2xl border border-white/[0.08] overflow-hidden"
-                    style={{ ...glassPillStyle, background: "rgba(3, 4, 18, 0.92)" }}
+                    style={{
+                      backdropFilter: "blur(24px) saturate(200%)",
+                      WebkitBackdropFilter: "blur(24px) saturate(200%)",
+                      background: "rgba(3, 4, 18, 0.92)",
+                    }}
                     initial={{ opacity: 0, y: -8, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.95 }}
                     transition={{ duration: 0.2, ease: EASE }}
                   >
-                    <MobileMenu
-                      links={NAV_LINKS}
-                      activeSection={activeSection}
-                      onClose={() => setIsOpen(false)}
-                    />
+                    <MobileMenu activeSection={activeSection} onClose={() => setIsOpen(false)} />
                   </motion.div>
                 )}
               </AnimatePresence>

@@ -196,7 +196,7 @@ const Navbar = () => {
             <div className="pointer-events-auto relative flex flex-col items-center">
               {/* Morphing pill */}
               <motion.div
-                className="flex items-center rounded-full border border-white/[0.18]"
+                className="flex items-center rounded-full border border-white/[0.18] min-w-[160px] sm:min-w-0 justify-between sm:justify-start"
                 initial={false}
                 animate={{
                   paddingLeft: cfg.px,

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Home, User, Briefcase, Mail } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Home", href: "#home", section: "home" },
-  { label: "About", href: "#about", section: "about" },
-  { label: "Work", href: "#work", section: "work" },
-  { label: "Contact", href: "#contact", section: "contact" },
+  { label: "Home", href: "#home", section: "home", Icon: Home },
+  { label: "About", href: "#about", section: "about", Icon: User },
+  { label: "Work", href: "#work", section: "work", Icon: Briefcase },
+  { label: "Contact", href: "#contact", section: "contact", Icon: Mail },
 ];
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -45,6 +46,34 @@ function NavLinks({ activeSection, compact, onLinkClick }) {
             ].join(" ")}
           >
             {label}
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* Icon-only nav — large phones (390px–639px) */
+function IconNav({ activeSection, onLinkClick }) {
+  return (
+    <nav className="hidden min-[390px]:flex sm:hidden items-center gap-0.5">
+      {NAV_LINKS.map(({ label, href, section, Icon }) => {
+        const isActive = activeSection === section;
+        return (
+          <a
+            key={section}
+            href={href}
+            onClick={onLinkClick}
+            aria-label={label}
+            title={label}
+            className={[
+              "rounded-full p-2 transition-all duration-300",
+              isActive
+                ? "bg-white/10 text-white"
+                : "text-neutral-400 hover:text-white hover:bg-white/5",
+            ].join(" ")}
+          >
+            <Icon size={16} strokeWidth={2} />
           </a>
         );
       })}
@@ -150,7 +179,7 @@ const Navbar = () => {
                 </a>
                 <button
                   onClick={() => setIsOpen((v) => !v)}
-                  className="flex sm:hidden text-neutral-400 hover:text-white transition-colors focus:outline-none"
+                  className="flex min-[390px]:hidden text-neutral-400 hover:text-white transition-colors focus:outline-none"
                   aria-label={isOpen ? "Close menu" : "Open menu"}
                 >
                   <img
@@ -160,6 +189,8 @@ const Navbar = () => {
                   />
                 </button>
                 <NavLinks activeSection={activeSection} onLinkClick={() => setIsOpen(false)} />
+                {/* Large phones in fullbar: icon-only */}
+                <IconNav activeSection={activeSection} onLinkClick={() => setIsOpen(false)} />
               </div>
             </div>
             <AnimatePresence>
@@ -218,14 +249,21 @@ const Navbar = () => {
                   Jason
                 </a>
                 <div className="hidden sm:block h-3.5 w-px bg-white/10 shrink-0" />
+                {/* Desktop: text labels */}
                 <NavLinks
                   activeSection={activeSection}
                   compact={navState === "small"}
                   onLinkClick={() => setIsOpen(false)}
                 />
+                {/* Large phones (390–639px): icon-only */}
+                <IconNav
+                  activeSection={activeSection}
+                  onLinkClick={() => setIsOpen(false)}
+                />
+                {/* Tiny phones (<390px): hamburger */}
                 <button
                   onClick={() => setIsOpen((v) => !v)}
-                  className="flex sm:hidden text-neutral-400 hover:text-white transition-colors focus:outline-none"
+                  className="flex min-[390px]:hidden text-neutral-400 hover:text-white transition-colors focus:outline-none"
                   aria-label={isOpen ? "Close menu" : "Open menu"}
                 >
                   <img

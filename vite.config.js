@@ -8,12 +8,10 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:3000",
     },
-    // Ignore .env changes — those are backend-only, no need to restart the frontend dev server
     watch: {
       ignored: ['**/.env', '**/.env.*', '**/server.js'],
     },
   },
-  // Declare heavy deps upfront so Vite skips the source-crawl phase on every startup
   optimizeDeps: {
     include: [
       'three',
@@ -26,6 +24,18 @@ export default defineConfig({
       'cobe',
       'maath',
       'react-responsive',
+      'lucide-react',
     ],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei', 'maath'],
+          'motion-vendor': ['framer-motion'],
+          'react-vendor': ['react', 'react-dom'],
+        },
+      },
+    },
   },
 })

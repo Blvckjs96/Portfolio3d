@@ -136,17 +136,20 @@ const Navbar = () => {
   }, [navState]);
 
   useEffect(() => {
-    const observers = NAV_LINKS.map(({ section }) => {
-      const el = document.getElementById(section);
-      if (!el) return null;
-      const observer = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveSection(section); },
-        { threshold: 0, rootMargin: "-10% 0px -60% 0px" }
-      );
-      observer.observe(el);
-      return observer;
-    });
-    return () => observers.forEach((obs) => obs?.disconnect());
+    const detect = () => {
+      const trigger = window.innerHeight * 0.35;
+      let active = "home";
+      for (const { section } of NAV_LINKS) {
+        const el = document.getElementById(section);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        if (top <= trigger) active = section;
+      }
+      setActiveSection(active);
+    };
+    detect();
+    window.addEventListener("scroll", detect, { passive: true });
+    return () => window.removeEventListener("scroll", detect);
   }, []);
 
   const isTop = navState === "top";
